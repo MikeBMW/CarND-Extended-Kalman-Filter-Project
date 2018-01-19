@@ -1,5 +1,5 @@
 #include "kalman_filter.h"
-
+#include "math.h"
 #include <iostream>
 #include "tools.h"
 using Eigen::MatrixXd;
@@ -40,9 +40,9 @@ void KalmanFilter::Update(const VectorXd &z) {
   VectorXd z_pred = H_ * x_;
   VectorXd y = z - z_pred;
   MatrixXd Ht = H_.transpose();
-  MatrixXd S = H_ * P_ * Ht + R_;
-  MatrixXd Si = S.inverse();
   MatrixXd PHt = P_ * Ht;
+  MatrixXd S = H_ * PHt + R_;
+  MatrixXd Si = S.inverse();
   MatrixXd K = PHt * Si;
 
   //new estimate
@@ -79,35 +79,34 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   //float varphi = atan(c3);
   float varphi = atan2(py,px);
   //cout << "varphi  :" << endl << varphi << endl;
-  float dotrho = c4/c2;
+  if(c2!=0){
+    float dotrho = c4/c2;
+  }
  	
 
   h << rho,varphi,dotrho;
-  cout << "h  :" << endl << h << endl;
-  
-
-  //measurement covariance
-  MatrixXd R;
-  R = MatrixXd(3, 3);
-  R<< 0.02, 0,0,
-      0, 0.0005,0,
-      0, 0, 0.02;	
+  cout << "h  :" << endl << h << endl;	
    
   //VectorXd z_pred = Hj * x_;
   VectorXd y = z - h;
+  /*
   if(y(1)>5){
     y(1) = y(1)-6.283;
   }else if(y(1)<-5){
     y(1) = y(1)+6.283;
+  }*/
+  if (y(1) > M_PI) {
+      y(1) = y(1) - 2 * M_PI;
+  } else if (y(1) < -M_PI) {
+      y(1) = y(1) + 2 * M_PI;
   }
   cout << "z  :" << endl << z << endl;
   cout << "h  :" << endl << h << endl;
   cout << "y  :" << endl << y << endl;
-  MatrixXd Ht = Hj.transpose();
-  MatrixXd S = Hj * P_ * Ht + R;
-  //MatrixXd S = Hj * P_ * Ht + R_;
-  MatrixXd Si = S.inverse();
-  MatrixXd PHt = P_ * Ht;
+  MatrixXd Ht = Hj.transpose(); 
+  MatrixXd PHt = P_ * Ht; 
+  MatrixXd S = Hj * PHt + R_;
+  MatrixXd Si = S.inverse();  
   MatrixXd K = PHt * Si;
 
 

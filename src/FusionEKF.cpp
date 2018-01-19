@@ -49,8 +49,8 @@ FusionEKF::FusionEKF() {
 
   //measurement covariance
   ekf_.R_ = MatrixXd(2, 2);
-  ekf_.R_ << 0.0225, 0,
-	     0, 0.0225;
+  //ekf_.R_ << 0.0225, 0,
+  //	     0, 0.0225;
 
   //measurement matrix
   ekf_.H_ = MatrixXd(2, 4);
@@ -167,12 +167,23 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    */
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-    // Radar updates
-    
+    // Radar updates 
+    //measurement covariance matrix - radar
+    //R_radar_ << 0.09, 0, 0,
+    //            0, 0.0009, 0,
+    //            0, 0, 0.09;
+    ekf_.R_ << 0.09, 0, 0,
+               0, 0.0009, 0,
+               0, 0, 0.09; 
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
     
   } else {
     // Laser updates
+    //measurement covariance matrix - laser
+    //R_laser_ << 0.0225, 0,
+    //            0, 0.0225;  
+    ekf_.R_ << 0.0225, 0,
+	       0, 0.0225;
     ekf_.Update(measurement_pack.raw_measurements_);
   }
 
